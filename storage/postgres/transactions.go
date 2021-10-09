@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"math"
 	"sort"
 
 	"github.com/huandu/go-sqlbuilder"
@@ -121,16 +120,19 @@ func (s *PGStore) CountTransactions() (int64, error) {
 }
 
 func (s *PGStore) FindTransactions(q query.Query) (query.Cursor, error) {
-	q.Limit = int(math.Max(-1, math.Min(float64(q.Limit), 100)))
 
-	c := query.Cursor{}
+	c := query.Cursor{
+		PageSize: q.Limit,
+	}
 	results := []core.Transaction{}
 
 	in := sqlbuilder.NewSelectBuilder()
 	in.Select("txid").From(s.table("postings"))
 	in.GroupBy("txid")
 	in.OrderBy("txid desc")
-	in.Limit(q.Limit)
+	if q.Limit > 0 {
+		in.Limit(q.Limit)
+	}
 
 	if q.After != "" {
 		in.Where(in.LessThan("txid", q.After))
@@ -161,8 +163,6 @@ func (s *PGStore) FindTransactions(q query.Query) (query.Cursor, error) {
 
 	sqlq, args := sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 
-	fmt.Println(sqlq)
-
 	rows, err := s.Conn().Query(
 		context.TODO(),
 		sqlq,
@@ -174,6 +174,7 @@ func (s *PGStore) FindTransactions(q query.Query) (query.Cursor, error) {
 	}
 
 	transactions := map[int64]core.Transaction{}
+	var firstTx int64
 
 	for rows.Next() {
 		var txid int64
@@ -205,6 +206,10 @@ func (s *PGStore) FindTransactions(q query.Query) (query.Cursor, error) {
 			}
 		}
 
+		if txid > firstTx {
+			firstTx = txid
+		}
+
 		t := transactions[txid]
 		t.AppendPosting(posting)
 		transactions[txid] = t
@@ -224,7 +229,30 @@ func (s *PGStore) FindTransactions(q query.Query) (query.Cursor, error) {
 		return results[i].ID > results[j].ID
 	})
 
+	queryRem := sqlbuilder.NewSelectBuilder()
+	queryRem.Select("count(*)")
+	queryRem.From(s.table("transactions"))
+	queryRem.Where(queryRem.GreaterThan("id", firstTx))
+
+	sqlRem, args := queryRem.BuildWithFlavor(sqlbuilder.PostgreSQL)
+
+	fmt.Println(sqlRem)
+
+	var remaining int
+
+	err = s.Conn().QueryRow(
+		context.TODO(),
+		sqlRem,
+		args...,
+	).Scan(&remaining)
+
+	if err != nil {
+		return c, err
+	}
+
 	c.Data = results
+	c.Remaining = remaining
+	c.HasMore = remaining > 0
 
 	return c, nil
 }

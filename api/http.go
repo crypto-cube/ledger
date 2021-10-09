@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/gin-contrib/cors"
@@ -90,9 +91,15 @@ func NewHttpAPI(lc fx.Lifecycle, resolver *ledger.Resolver) *HttpAPI {
 	r.GET("/:ledger/transactions", func(c *gin.Context) {
 		l, _ := c.Get("ledger")
 
+		limit, err := strconv.Atoi(c.Query("limit"))
+		if err != nil {
+			limit = query.DEFAULT_LIMIT
+		}
+
 		cursor, err := l.(*ledger.Ledger).FindTransactions(
 			query.After(c.Query("after")),
 			query.Account(c.Query("account")),
+			query.Limit(limit),
 		)
 
 		c.JSON(200, gin.H{
