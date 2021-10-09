@@ -4,3 +4,4 @@ coverage.out
 cmd/control/*
 !cmd/control/gitkeep
 .DS_Store
+build

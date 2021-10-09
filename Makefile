@@ -1,3 +1,12 @@
+default:build
+
+build:
+	mkdir -p build
+	go build -o ./build/numary
+
+clean:
+	rm -r build
+
 test:
 	go test -v -coverprofile=coverage.out -coverpkg=./... ./...
 
