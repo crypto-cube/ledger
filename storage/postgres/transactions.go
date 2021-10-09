@@ -147,6 +147,7 @@ func (s *PGStore) FindTransactions(q query.Query) (query.Cursor, error) {
 	sb.Select(
 		"t.id",
 		"t.timestamp",
+		"t.reference",
 		"t.hash",
 		"p.source",
 		"p.destination",
@@ -159,6 +160,8 @@ func (s *PGStore) FindTransactions(q query.Query) (query.Cursor, error) {
 	sb.OrderBy("t.id desc, p.id asc")
 
 	sqlq, args := sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
+
+	fmt.Println(sqlq)
 
 	rows, err := s.Conn().Query(
 		context.TODO(),
@@ -175,6 +178,7 @@ func (s *PGStore) FindTransactions(q query.Query) (query.Cursor, error) {
 	for rows.Next() {
 		var txid int64
 		var ts string
+		var ref string
 		var thash string
 
 		posting := core.Posting{}
@@ -182,6 +186,7 @@ func (s *PGStore) FindTransactions(q query.Query) (query.Cursor, error) {
 		rows.Scan(
 			&txid,
 			&ts,
+			&ref,
 			&thash,
 			&posting.Source,
 			&posting.Destination,
@@ -195,6 +200,7 @@ func (s *PGStore) FindTransactions(q query.Query) (query.Cursor, error) {
 				Postings:  []core.Posting{},
 				Timestamp: ts,
 				Hash:      thash,
+				Reference: ref,
 				Metadata:  core.Metadata{},
 			}
 		}
