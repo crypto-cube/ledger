@@ -109,6 +109,17 @@ func NewHttpAPI(lc fx.Lifecycle, resolver *ledger.Resolver) *HttpAPI {
 		})
 	})
 
+	r.GET("/:ledger/balances", func(c *gin.Context) {
+		l, _ := c.Get("ledger")
+		cursor, err := l.(*ledger.Ledger).GetBalances()
+
+		c.JSON(200, gin.H{
+			"ok":     err == nil,
+			"cursor": cursor,
+			"err":    err,
+		})
+	})
+
 	r.POST("/:ledger/transactions", func(c *gin.Context) {
 		l, _ := c.Get("ledger")
 

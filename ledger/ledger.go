@@ -111,7 +111,7 @@ func (l *Ledger) Commit(ts []core.Transaction) error {
 	}
 
 	for addr := range rf {
-		if addr == "world" {
+		if addr == core.WORLD {
 			continue
 		}
 
@@ -188,6 +188,13 @@ func (l *Ledger) FindAccounts(m ...query.QueryModifier) (query.Cursor, error) {
 	q := query.New(m)
 
 	c, err := l.store.FindAccounts(q)
+
+	return c, err
+}
+
+func (l *Ledger) GetBalances(m ...query.QueryModifier) (query.Cursor, error) {
+	q := query.New(m)
+	c, err := l.store.Balances(q)
 
 	return c, err
 }

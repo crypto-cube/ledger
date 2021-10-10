@@ -68,6 +68,12 @@ func (s *PGStore) SaveTransactions(ts []core.Transaction) error {
 
 				return err
 			}
+
+			err = s.TouchBalance(tx, p.Source, p.Destination, p.Asset, p.Amount)
+			if err != nil {
+				tx.Rollback(context.Background())
+				return err
+			}
 		}
 
 		for key, value := range t.Metadata {
@@ -235,8 +241,6 @@ func (s *PGStore) FindTransactions(q query.Query) (query.Cursor, error) {
 	queryRem.Where(queryRem.GreaterThan("id", firstTx))
 
 	sqlRem, args := queryRem.BuildWithFlavor(sqlbuilder.PostgreSQL)
-
-	fmt.Println(sqlRem)
 
 	var remaining int
 

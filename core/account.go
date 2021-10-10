@@ -1,7 +1,7 @@
 package core
 
 const (
-	WORLD = "world"
+	WORLD = "bank"
 )
 
 type Account struct {

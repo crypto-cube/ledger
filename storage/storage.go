@@ -16,6 +16,7 @@ type Store interface {
 	FindAccounts(query.Query) (query.Cursor, error)
 	SaveMeta(string, string, core.Metadata) error
 	GetMeta(string, string) (core.Metadata, error)
+	Balances(q query.Query) (query.Cursor, error)
 	Initialize() error
 	Close()
 }
