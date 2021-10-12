@@ -1,0 +1,19 @@
+name: Docker Image CI
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+
+ build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Publish to Registry
+        uses: AhnSeongHyun/action-tag-docker-build-push@master
+        with:
+          repo_name: ash84/meier
+          username: ${{ image.DOCKER_USER }}
+          password: ${{ imag.DOCKER_TOKEN }}
