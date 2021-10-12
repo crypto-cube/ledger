@@ -22,5 +22,5 @@ jobs:
         uses: AhnSeongHyun/action-tag-docker-build-push@master
         with:
           repo_name: ash84/meier
-          username: ${{ image.DOCKER_USER }}
-          password: ${{ image.DOCKER_TOKEN }}
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
