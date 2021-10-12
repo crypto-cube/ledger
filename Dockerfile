@@ -1,9 +1,13 @@
-FROM alpine
+FROM golang:1.17.2-alpine AS build
 
-RUN apk add --update-cache curl \
-   && rm -rf /var/cache/apk/*
-COPY numary /usr/local/bin/numary
+WORKDIR /src/
+COPY . /src/
+RUN CGO_ENABLED=0 go build -o /bin/numary
+
+FROM scratch
+COPY --from=build /bin/numary /bin/numary
 
 EXPOSE 3068
 
-CMD ["numary", "server", "start"]
+ENTRYPOINT ["/bin/numary"]
+
