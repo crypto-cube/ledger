@@ -34,7 +34,7 @@ var (
 )
 
 func PrintVersion(cmd *cobra.Command, args []string) {
-	fmt.Printf("Version: %s \n", Version)
+	fmt.Printf("Version: %s CryptoCube Mod\n", Version)
 	fmt.Printf("Date: %s \n", BuildDate)
 	fmt.Printf("Commit: %s \n", Commit)
 }
