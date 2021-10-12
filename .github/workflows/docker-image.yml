@@ -23,4 +23,4 @@ jobs:
         with:
           repo_name: ash84/meier
           username: ${{ image.DOCKER_USER }}
-          password: ${{ imag.DOCKER_TOKEN }}
+          password: ${{ image.DOCKER_TOKEN }}
